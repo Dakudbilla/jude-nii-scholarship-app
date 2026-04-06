@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Check if user has appropriate role
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.role == "SUPER_ADMIN";
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.role == "SUPER_ADMIN" || request.auth.token.role == "ADMIN");
+    }
+    
+    // 1. Audit Logs - Write-only from server (admin SDK bypasses this, so clients have read/write purely blocked)
+    match /auditLogs/{logId} {
+      allow read, write: if false; 
+    }
+    
+    // 2. Academic Years - Fully readable by public (for active check), admins can write through API
+    match /academicYears/{yearId} {
+      allow read: if true; 
+      allow write: if false; // All writes are done via Admin SDK API endpoints
+      
+      // Wings subcollection
+      match /wings/{wingId} {
+        allow read: if true;
+        allow write: if false;
+      }
+      
+      // Applications subcollection (Students own their draft, admin reads/writes)
+      match /applications/{appId} {
+        allow read, write: if false; // Handled securely by APIs to maintain strict engineering philosophy
+      }
+    }
+    
+    // Default block all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
