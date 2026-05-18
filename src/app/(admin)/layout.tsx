@@ -5,9 +5,21 @@ import { useRouter, usePathname } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import Link from "next/link";
-import { LayoutDashboard, Users, FolderOpen, Award, Shield, FileText, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FolderOpen, Award, Shield, FileText, Settings, LogOut, RefreshCcw } from "lucide-react";
+import { CycleProvider, useCycle } from "@/providers/CycleProvider";
+import { ToastProvider } from "@/components/ui/toast";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <CycleProvider>
+      <ToastProvider>
+        <AdminShell>{children}</AdminShell>
+      </ToastProvider>
+    </CycleProvider>
+  );
+}
+
+function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
@@ -34,18 +46,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => unsubscribe();
   }, [router, pathname]);
 
-  if (loading) {
+  const { selectedCycle, clearCycle, isReady } = useCycle();
+
+  useEffect(() => {
+    // If auth and cycle states are ready, enforce cycle selection
+    if (!loading && isReady) {
+      const isExemptRoute = 
+        pathname === "/admin" || 
+        pathname.includes("/admin/login") || 
+        pathname.startsWith("/admin/setup") ||
+        pathname.startsWith("/admin/years");
+        
+      if (!isExemptRoute && !selectedCycle) {
+        router.push("/admin");
+      }
+    }
+  }, [loading, isReady, pathname, selectedCycle, router]);
+
+  if (loading || !isReady) {
     return <div className="h-screen w-full flex items-center justify-center bg-slate-50">Loading...</div>;
   }
 
-  // Dont show sidebar on login page
-  if (pathname.includes("/admin/login")) {
+  // Dont show sidebar on exempt pages
+  if (pathname.includes("/admin/login") || pathname === "/admin" || pathname.startsWith("/admin/setup") || pathname.startsWith("/admin/years")) {
     return <>{children}</>;
   }
 
   const navItems = [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Academic Years", href: "/admin/years", icon: FolderOpen },
+    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Applications", href: "/admin/applications", icon: FileText },
     { label: "Wings", href: "/admin/wings", icon: Users },
     { label: "Endorsements", href: "/admin/endorsements", icon: Shield },
@@ -54,39 +82,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50/50">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 border-r border-slate-800 text-slate-300 flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <h1 className="text-white font-bold text-lg">Jude Nii Manager</h1>
+      <div className="w-64 bg-primary border-r border-primary/20 text-slate-300 flex flex-col shadow-xl">
+        <div className="h-24 flex flex-col justify-center px-6 border-b border-white/10 space-y-1">
+          <h1 className="text-white font-extrabold tracking-tight text-lg leading-none">Jude Nii Admin</h1>
+          <span className="text-[10px] uppercase font-bold text-secondary tracking-widest">NUPS-G KNUST</span>
+          {selectedCycle && (
+            <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-white/10 text-white w-max">
+              Cycle: {selectedCycle.label}
+            </div>
+          )}
         </div>
         
-        <nav className="flex-1 py-6 px-3 space-y-1">
+        <nav className="flex-1 py-6 px-4 space-y-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link 
                 key={item.href} 
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium ${
                   isActive 
-                    ? "bg-slate-800 text-white" 
-                    : "hover:bg-slate-800/50 hover:text-white"
+                    ? "bg-secondary text-primary shadow-[0_0_15px_-3px_rgba(234,179,8,0.3)]" 
+                    : "hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <item.icon className="w-4 h-4" />
-                <span className="text-sm font-medium">{item.label}</span>
+                <item.icon className="w-5 h-5" />
+                <span className="text-sm">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-white/10 space-y-2">
           <button 
-            onClick={() => auth.signOut()}
-            className="flex items-center gap-3 px-3 py-2 w-full rounded-md hover:bg-slate-800/50 hover:text-white transition-colors text-slate-400"
+            onClick={() => {
+              clearCycle();
+              router.push("/admin");
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-white/10 hover:text-white transition-colors text-slate-400"
           >
-            <LogOut className="w-4 h-4" />
+            <RefreshCcw className="w-5 h-5" />
+            <span className="text-sm font-medium">Switch Cycle</span>
+          </button>
+          
+          <button 
+            onClick={() => {
+              clearCycle();
+              auth.signOut();
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors text-slate-400"
+          >
+            <LogOut className="w-5 h-5" />
             <span className="text-sm font-medium">Sign Out</span>
           </button>
         </div>

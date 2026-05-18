@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { ArrowLeft, Search, GraduationCap } from "lucide-react";
 
 export default function StatusPage() {
   const [studentId, setStudentId] = useState("");
@@ -26,33 +27,42 @@ export default function StatusPage() {
 
   const getStatusDisplay = (status: string) => {
     switch(status) {
-      case "PENDING_ENDORSEMENT": return { text: "Waiting for Wing Head Endorsement", color: "text-amber-600 bg-amber-50 border-amber-200" };
-      case "ENDORSED": return { text: "Endorsed. Waiting for Review.", color: "text-blue-600 bg-blue-50 border-blue-200" };
-      case "REJECTED_BY_WING": return { text: "Application Denied by Wing Head", color: "text-red-600 bg-red-50 border-red-200" };
-      case "IN_REVIEW": return { text: "Currently Being Reviewed", color: "text-indigo-600 bg-indigo-50 border-indigo-200" };
-      case "INTERVIEW": return { text: "Shortlisted for Interview", color: "text-purple-600 bg-purple-50 border-purple-200" };
-      case "REJECTED": return { text: "Not Selected This Cycle", color: "text-slate-600 bg-slate-100 border-slate-300" };
-      case "AWARDED": return { text: "Congratulations! You have been awarded.", color: "text-green-700 bg-green-50 border-green-300" };
-      default: return { text: "Unknown Status", color: "text-slate-600 bg-slate-50 border-slate-200" };
+      case "PENDING_ENDORSEMENT": return { text: "Waiting for Wing Head Endorsement", style: "badge-pending" };
+      case "ENDORSED": return { text: "Endorsed. Waiting for Review.", style: "badge-endorsed" };
+      case "REJECTED_BY_WING": return { text: "Application Denied by Wing Head", style: "badge-rejected" };
+      case "IN_REVIEW": return { text: "Currently Being Reviewed", style: "bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200" };
+      case "INTERVIEW": return { text: "Shortlisted for Interview", style: "badge-interview" };
+      case "REJECTED": return { text: "Not Selected This Cycle", style: "bg-slate-100 text-slate-700 ring-1 ring-slate-200" };
+      case "AWARDED": return { text: "Congratulations! You have been awarded.", style: "badge-awarded" };
+      default: return { text: "Unknown Status", style: "badge-default" };
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-24 px-6 flex flex-col items-center">
-      <div className="mb-8">
-        <Link href="/apply" className="text-sm font-medium text-slate-500 hover:text-slate-800">
-          &larr; Back to Portal
+    <div className="min-h-[100dvh] bg-slate-50 py-12 px-4 sm:px-6 flex flex-col items-center noise">
+      
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-full max-w-3xl h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10 mb-8 mt-12">
+        <Link href="/apply" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white px-4 py-2 rounded-full shadow-sm ring-1 ring-slate-200/50">
+          <ArrowLeft className="w-4 h-4" /> Go Back
         </Link>
       </div>
 
       {!statusMutation.data ? (
-        <div className="bg-white p-8 rounded-xl shadow-sm border max-w-md w-full">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Check Application Status</h1>
-          <p className="text-slate-500 text-sm mb-6">Enter the credentials you used to submit your application.</p>
+        <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_20px_60px_rgb(0,0,0,0.04)] max-w-md w-full relative">
+          <div className="mb-8">
+             <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-slate-100">
+               <Search className="w-6 h-6 text-slate-600" />
+             </div>
+             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Track Status</h1>
+             <p className="text-slate-500 text-base font-medium">Verify your application state using your credentials.</p>
+          </div>
           
           {statusMutation.isError && (
-            <div className="bg-red-50 text-red-800 text-sm p-3 rounded mb-4">
-              {statusMutation.error.message}
+            <div className="bg-red-50 text-red-800 text-sm font-semibold p-4 rounded-xl mb-6 border border-red-100">
+               {statusMutation.error.message}
             </div>
           )}
           
@@ -61,61 +71,75 @@ export default function StatusPage() {
               e.preventDefault();
               if (studentId && email) statusMutation.mutate();
             }} 
-            className="space-y-4"
+            className="space-y-5"
           >
             <div className="space-y-2">
-              <Label>Student Reference / Index Number</Label>
+              <Label className="font-bold text-slate-700">Student ID or Ref Number</Label>
               <Input 
                 value={studentId} 
                 onChange={(e) => setStudentId(e.target.value)} 
-                placeholder="20600000" 
+                placeholder="e.g. 20600000" 
                 disabled={statusMutation.isPending}
+                className="input-premium"
               />
             </div>
             <div className="space-y-2">
-              <Label>Email Address</Label>
+              <Label className="font-bold text-slate-700">Application Email</Label>
               <Input 
                 type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 placeholder="john@edu.gh" 
                 disabled={statusMutation.isPending}
+                className="input-premium"
               />
             </div>
-            <Button type="submit" className="w-full" isLoading={statusMutation.isPending}>
-              View Status
-            </Button>
+            <div className="pt-2">
+              <Button type="submit" className="w-full h-14 rounded-xl font-bold text-lg bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20" isLoading={statusMutation.isPending}>
+                Track Submission
+              </Button>
+            </div>
           </form>
         </div>
       ) : (
-        <div className="bg-white p-8 rounded-xl shadow-sm border max-w-lg w-full text-center space-y-6">
-          <h2 className="text-2xl font-bold text-slate-900">Application Found</h2>
+        <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_20px_60px_rgb(0,0,0,0.06)] max-w-lg w-full text-center space-y-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
+          
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Status Report</h2>
           
           {statusMutation.data.exists ? (
-            <div className="space-y-4 pt-4 border-t border-b py-6">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500">Applicant ID:</span>
-                <span className="font-semibold">{studentId}</span>
+            <div className="space-y-6 pt-4 border-t border-b border-slate-100 py-8">
+              <div className="flex justify-between items-center text-base bg-slate-50 p-4 rounded-2xl">
+                 <span className="text-slate-500 font-medium">Applicant ID:</span>
+                 <span className="font-bold text-slate-900">{studentId}</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500">Cycle:</span>
-                <span className="font-semibold">{statusMutation.data.yearLabel}</span>
+              <div className="flex justify-between items-center text-base bg-slate-50 p-4 rounded-2xl">
+                 <span className="text-slate-500 font-medium">Academic Cycle:</span>
+                 <span className="font-bold text-slate-900">{statusMutation.data.yearLabel}</span>
               </div>
               
-              <div className="pt-4">
-                <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Current Pipeline Status</div>
-                <div className={`px-4 py-3 rounded-md border font-medium ${getStatusDisplay(statusMutation.data.status).color}`}>
+              <div className="pt-6">
+                <div className="text-xs text-slate-400 uppercase tracking-widest font-black mb-4">Pipeline Status</div>
+                <div className={`px-6 py-4 rounded-2xl text-lg font-bold shadow-sm ${getStatusDisplay(statusMutation.data.status).style}`}>
                    {getStatusDisplay(statusMutation.data.status).text}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-amber-800 bg-amber-50 border p-4 rounded-md">
-              <p>No submitted application found for these credentials in the active cycle. If you only started a draft, please return to the Application Portal to complete and submit it.</p>
+            <div className="bg-amber-50 text-amber-900 p-8 rounded-2xl border border-amber-200 text-left">
+              <div className="flex gap-4 items-start">
+                 <GraduationCap className="w-8 h-8 text-amber-500 shrink-0 mt-1" />
+                 <div>
+                    <h4 className="font-bold text-lg mb-2">No Final Submission Found</h4>
+                    <p className="text-amber-800/80 font-medium leading-relaxed">
+                      We couldn't find a submitted application in the active cycle for these credentials. If you started a draft, please return to the Application Portal to complete and submit it.
+                    </p>
+                 </div>
+              </div>
             </div>
           )}
           
-          <Button variant="ghost" onClick={() => statusMutation.reset()}>Check Another</Button>
+          <Button variant="ghost" className="h-12 px-6 font-bold text-slate-500 hover:text-slate-800 rounded-xl" onClick={() => statusMutation.reset()}>Check Another</Button>
         </div>
       )}
     </div>

@@ -3,9 +3,55 @@ import { draftRepository } from "@/lib/repositories/DraftRepository";
 import { yearRepository } from "@/lib/repositories/YearRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";
 
+// GET /api/drafts?yearId=&studentId=&email=
+// Fetches or initialises a draft for the applicant. Safe to use in useQuery.
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const yearId = searchParams.get("yearId");
+    const studentId = searchParams.get("studentId");
+    const email = searchParams.get("email");
+
+    if (!yearId || !studentId || !email) {
+      return apiError("Year, Student ID, and Email query params are required", 400);
+    }
+
+    const year = await yearRepository.getById(yearId);
+    if (!year || year.status !== "OPEN") {
+      return apiError("Applications are not currently open for this cycle", 403);
+    }
+
+    let draft = await draftRepository.getDraft(yearId, studentId);
+
+    if (!draft) {
+      draft = {
+        id: `${yearId}_${studentId}`,
+        yearId,
+        studentId,
+        email,
+        currentStep: 1,
+        personalInfo: {},
+        academicInfo: {},
+        financialInfo: {},
+        wingSelection: "",
+        updatedAt: new Date(),
+      };
+      await draftRepository.saveDraft(yearId, studentId, email, draft);
+    } else {
+      if (draft.email.toLowerCase() !== email.toLowerCase()) {
+        return apiError("Student ID already associated with a different email", 403);
+      }
+    }
+
+    return apiSuccess(draft);
+  } catch (error) {
+    console.error("Draft GET failed:", error);
+    return apiError("Internal Server Error", 500);
+  }
+}
+
 // POST /api/drafts
-// Since applicants don't have proper accounts, they provide their yearId, studentId, and email.
-// We use this to return their draft state or initialize a new one.
+// Saves (updates) an existing draft OR initialises one (legacy path used by ApplicantLogin).
 export async function POST(req: Request) {
   try {
     const payload = await req.json();

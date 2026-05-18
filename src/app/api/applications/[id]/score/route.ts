@@ -5,8 +5,8 @@ import { apiError, apiSuccess } from "@/lib/api/response";
 
 export const POST = withAdminAuth(async (req, context, authContext) => {
   try {
-    const { params } = context as { params: { id: string } };
-    const appId = await params.id;
+    const { params } = context as { params: Promise<{ id: string }> };
+    const { id: appId } = await params;
     
     const body = await req.json();
     const { criteriaScores, comments } = body;

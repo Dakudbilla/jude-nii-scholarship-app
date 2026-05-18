@@ -1,25 +1,33 @@
+/**
+ * Single source of truth for all API endpoint URLs.
+ * Must match the actual Next.js API route file structure under `src/app/api/`.
+ */
 export const API_ENDPOINTS = {
   years: {
     list: () => "/api/years",
-    create: () => "/api/years",
     byId: (id: string) => `/api/years/${id}`,
-  },
-  wings: {
-    list: (yearId: string) => `/api/years/${yearId}/wings`,
-    create: (yearId: string) => `/api/years/${yearId}/wings`,
+    setup: () => "/api/years/setup",
+    active: () => "/api/years/active",
   },
   applications: {
-    list: (yearId: string) => `/api/years/${yearId}/applications`,
+    list: (yearId: string) => `/api/applications?yearId=${yearId}`,
     byId: (id: string) => `/api/applications/${id}`,
     submit: () => "/api/applications/submit",
-    updateStatus: (id: string) => `/api/applications/${id}/status`,
+    score: (id: string) => `/api/applications/${id}/score`,
+    status: () => "/api/applications/status",
+  },
+  wings: {
+    list: (yearId: string) => `/api/wings?yearId=${yearId}`,
+    create: () => "/api/wings",
+    byId: (id: string) => `/api/wings/${id}`,
+  },
+  dashboard: {
+    stats: (yearId: string) => `/api/dashboard?yearId=${yearId}`,
   },
   endorsements: {
-    list: (yearId: string) => `/api/years/${yearId}/endorsements`,
-    submit: (token: string) => `/api/endorse/${token}`,
+    byToken: (token: string) => `/api/endorse/${token}`,
   },
-  awards: {
-    publish: (id: string) => `/api/awards/${id}/publish`,
-    accept: (token: string) => `/api/accept/${token}`,
+  drafts: {
+    save: () => "/api/drafts",
   },
 };

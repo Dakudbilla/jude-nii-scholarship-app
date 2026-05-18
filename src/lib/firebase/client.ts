@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -19,14 +19,4 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-if (process.env.NODE_ENV === "development") {
-  // Prevent duplicate connection errors during Next.js Hot Module Reload
-  if (!(auth as any)._isEmulator) {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    (auth as any)._isEmulator = true;
-  }
-  if (!(db as any)._isEmulator) {
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
-    (db as any)._isEmulator = true;
-  }
-}
+// Removed local emulator block

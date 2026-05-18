@@ -2,7 +2,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { applicationRepository } from "../repositories/ApplicationRepository";
 import { draftRepository } from "../repositories/DraftRepository";
 import { Application, ApplicationDraft } from "../interfaces/core";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import * as crypto from "crypto";
 
 export class ApplicationService {
@@ -79,5 +79,3 @@ export class ApplicationService {
     });
   }
 }
-
-import { Timestamp } from "firebase-admin/firestore";

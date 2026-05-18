@@ -9,7 +9,12 @@ import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { Wing } from "@/lib/interfaces/core";
 
+// ======================
+// APPLICANT LOGIN
+// ======================
 function ApplicantLogin({ activeYearId, onLogin }: { activeYearId: string, onLogin: (auth: { studentId: string, email: string }) => void }) {
   const [studentId, setStudentId] = useState("");
   const [email, setEmail] = useState("");
@@ -26,15 +31,16 @@ function ApplicantLogin({ activeYearId, onLogin }: { activeYearId: string, onLog
     setLoading(true);
     setError(null);
     try {
+      // initialise draft via POST (legacy path)
       const res = await fetch("/api/drafts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ yearId: activeYearId, studentId, email })
       });
-      
+
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.message || "Failed to initialize application");
-      
+
       onLogin({ studentId, email });
     } catch (err: any) {
       setError(err.message);
@@ -44,35 +50,39 @@ function ApplicantLogin({ activeYearId, onLogin }: { activeYearId: string, onLog
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-2">Resume or Start</h2>
-      <p className="text-slate-500 text-sm mb-6">Enter your credentials to securely access your draft. Your progress auto-saves as you go.</p>
-      
-      {error && <div className="bg-red-50 text-red-800 text-sm p-3 rounded mb-4">{error}</div>}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-lg mx-auto">
+      <h2 className="text-3xl font-extrabold mb-3 text-slate-900 tracking-tight">Resume or Start</h2>
+      <p className="text-slate-500 text-base mb-8 leading-relaxed">Enter your credentials to securely access your application draft. Your progress auto-saves securely.</p>
+
+      {error && <div className="bg-red-50 text-red-800 text-sm p-4 rounded-xl mb-6 font-medium border border-red-100">{error}</div>}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label>Student Reference / Index Number</Label>
-          <Input 
-            value={studentId} 
-            onChange={(e) => setStudentId(e.target.value)} 
-            placeholder="e.g. 20600000" 
+          <Label className="text-slate-700 font-semibold">Student Reference / Index Number</Label>
+          <Input
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            placeholder="e.g. 20600000"
             disabled={loading}
+            className="h-12 bg-slate-50 focus:bg-white rounded-xl text-lg"
           />
         </div>
         <div className="space-y-2">
-          <Label>Email Address</Label>
-          <Input 
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            placeholder="john@edu.gh" 
+          <Label className="text-slate-700 font-semibold">Email Address</Label>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="john@edu.gh"
             disabled={loading}
+            className="h-12 bg-slate-50 focus:bg-white rounded-xl text-lg"
           />
         </div>
-        <Button type="submit" className="w-full" isLoading={loading}>Access Portal</Button>
+        <div className="pt-4">
+          <Button type="submit" className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20" isLoading={loading}>Access Portal</Button>
+        </div>
       </form>
-    </div>
+    </motion.div>
   );
 }
 
@@ -91,12 +101,11 @@ function Step1Personal({ draft, onSaveAndNext, isLoading }: { draft: any, onSave
     defaultValues: draft.personalInfo || {},
   });
   return (
-    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left max-w-lg mx-auto">
-      <h3 className="text-xl font-semibold border-b pb-2 mb-4 text-slate-800">1. Personal Information</h3>
-      <div className="space-y-2"><Label>Full Legal Name</Label><Input {...register("fullName")} disabled={isLoading} />{errors.fullName && <p className="text-sm text-red-500">{errors.fullName.message}</p>}</div>
-      <div className="space-y-2"><Label>Phone Number</Label><Input {...register("phone")} disabled={isLoading} />{errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}</div>
-      <div className="space-y-2"><Label>Date of Birth</Label><Input type="date" {...register("dob")} disabled={isLoading} />{errors.dob && <p className="text-sm text-red-500">{errors.dob.message}</p>}</div>
-      <div className="pt-6"><Button type="submit" className="w-full" isLoading={isLoading}>Save & Continue</Button></div>
+    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left w-full h-full">
+      <div className="space-y-2"><Label className="font-semibold text-slate-700">Full Legal Name</Label><Input {...register("fullName")} disabled={isLoading} className="h-12 bg-slate-50 focus:bg-white rounded-xl" />{errors.fullName && <p className="text-sm text-red-500 font-medium">{errors.fullName.message}</p>}</div>
+      <div className="space-y-2"><Label className="font-semibold text-slate-700">Phone Number</Label><Input {...register("phone")} disabled={isLoading} className="h-12 bg-slate-50 focus:bg-white rounded-xl" />{errors.phone && <p className="text-sm text-red-500 font-medium">{errors.phone.message}</p>}</div>
+      <div className="space-y-2"><Label className="font-semibold text-slate-700">Date of Birth</Label><Input type="date" {...register("dob")} disabled={isLoading} className="h-12 bg-slate-50 focus:bg-white rounded-xl" />{errors.dob && <p className="text-sm text-red-500 font-medium">{errors.dob.message}</p>}</div>
+      <div className="pt-6"><Button type="submit" className="w-full h-12 text-base rounded-xl font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20" isLoading={isLoading}>Save &amp; Continue</Button></div>
     </form>
   );
 }
@@ -116,19 +125,18 @@ function Step2Academic({ draft, onSaveAndNext, onBack, isLoading }: { draft: any
     defaultValues: draft.academicInfo || {},
   });
   return (
-    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left max-w-lg mx-auto">
-      <h3 className="text-xl font-semibold border-b pb-2 mb-4 text-slate-800">2. Academic Information</h3>
-      <div className="space-y-2"><Label>Degree Programme</Label><Input {...register("programme")} disabled={isLoading} />{errors.programme && <p className="text-sm text-red-500">{errors.programme.message}</p>}</div>
+    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left w-full h-full">
+      <div className="space-y-2"><Label className="font-semibold text-slate-700">Degree Programme</Label><Input {...register("programme")} disabled={isLoading} className="h-12 bg-slate-50 focus:bg-white rounded-xl" />{errors.programme && <p className="text-sm text-red-500 font-medium">{errors.programme.message}</p>}</div>
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2"><Label>Current Year</Label>
-          <select {...register("year")} className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" disabled={isLoading}>
+        <div className="space-y-2"><Label className="font-semibold text-slate-700">Current Year</Label>
+          <select {...register("year")} className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all px-3 py-2 text-sm outline-none" disabled={isLoading}>
             <option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option><option value="5">Year 5</option><option value="6">Year 6</option>
           </select>
         </div>
-        <div className="space-y-2"><Label>Current CWA</Label><Input type="number" step="0.01" {...register("cwa", { valueAsNumber: true })} disabled={isLoading} /></div>
+        <div className="space-y-2"><Label className="font-semibold text-slate-700">Current CWA</Label><Input type="number" step="0.01" {...register("cwa", { valueAsNumber: true })} disabled={isLoading} className="h-12 bg-slate-50 focus:bg-white rounded-xl" /></div>
       </div>
-      <div className="p-4 bg-blue-50 text-blue-800 text-sm rounded-md">Note: You must bring a transcript to your interview.</div>
-      <div className="pt-6 flex justify-between"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>Back</Button><Button type="submit" isLoading={isLoading}>Save & Continue</Button></div>
+      <div className="p-4 bg-secondary/10 border border-secondary/20 text-slate-900 text-sm rounded-xl font-medium">📋 Note: You must be able to securely provide your current terminal semester transcript upon request.</div>
+      <div className="pt-6 flex justify-between gap-4"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading} className="h-12 w-32 rounded-xl border font-bold">Back</Button><Button type="submit" className="h-12 flex-1 text-base rounded-xl font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20" isLoading={isLoading}>Save &amp; Continue</Button></div>
     </form>
   );
 }
@@ -149,21 +157,31 @@ function Step3Financial({ draft, onSaveAndNext, onBack, isLoading }: { draft: an
     defaultValues: draft.financialInfo || { hasOtherScholarship: false },
   });
   return (
-    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left max-w-2xl mx-auto">
-      <h3 className="text-xl font-semibold border-b pb-2 mb-4 text-slate-800">3. Financial Need & Essays</h3>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2"><Label>Who pays your fees?</Label>
-          <select {...register("sponsorStatus")} className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+    <form onSubmit={handleSubmit(onSaveAndNext)} className="space-y-6 text-left w-full h-full">
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div className="space-y-2"><Label className="font-semibold text-slate-700">Who primarily pays your fees?</Label>
+          <select {...register("sponsorStatus")} className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all px-3 py-2 text-sm outline-none">
             <option value="PARENTS">Parents</option><option value="RELATIVE">Relative</option><option value="SELF">Self-Sponsored</option><option value="OTHER">Other</option>
           </select>
         </div>
         <div className="space-y-2 flex flex-col justify-center">
-          <Label className="flex items-center gap-2 cursor-pointer mt-4"><input type="checkbox" {...register("hasOtherScholarship")} className="w-4 h-4" /> I have another scholarship</Label>
+          <Label className="flex items-center gap-3 cursor-pointer mt-4 p-4 border border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+            <input type="checkbox" {...register("hasOtherScholarship")} className="w-5 h-5 rounded text-primary focus:ring-primary border-slate-300" />
+            <span className="font-semibold text-slate-700">I have another scholarship</span>
+          </Label>
         </div>
       </div>
-      <div className="space-y-2"><Label>Financial Hardship explanation</Label><textarea {...register("hardshipEssay")} className="flex w-full rounded-md border p-3 text-sm min-h-[100px]" />{errors.hardshipEssay && <p className="text-sm text-red-500">{errors.hardshipEssay.message}</p>}</div>
-      <div className="space-y-2"><Label>Church Activeness explanation</Label><textarea {...register("churchEssay")} className="flex w-full rounded-md border p-3 text-sm min-h-[100px]" />{errors.churchEssay && <p className="text-sm text-red-500">{errors.churchEssay.message}</p>}</div>
-      <div className="pt-6 flex justify-between"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>Back</Button><Button type="submit" isLoading={isLoading}>Save & Continue</Button></div>
+      <div className="space-y-2">
+        <Label className="font-semibold text-slate-700">Financial Hardship explanation</Label>
+        <textarea {...register("hardshipEssay")} placeholder="Explain your current financial situation in detail..." className="flex w-full rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all px-4 py-3 text-sm min-h-[120px] outline-none resize-y" />
+        {errors.hardshipEssay && <p className="text-sm text-red-500 font-medium">{errors.hardshipEssay.message}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label className="font-semibold text-slate-700">Church Activeness explanation</Label>
+        <textarea {...register("churchEssay")} placeholder="Detail your spiritual involvement and wing activities..." className="flex w-full rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all px-4 py-3 text-sm min-h-[120px] outline-none resize-y" />
+        {errors.churchEssay && <p className="text-sm text-red-500 font-medium">{errors.churchEssay.message}</p>}
+      </div>
+      <div className="pt-6 flex justify-between gap-4"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading} className="h-12 w-32 rounded-xl border font-bold">Back</Button><Button type="submit" className="h-12 flex-1 text-base rounded-xl font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20" isLoading={isLoading}>Save &amp; Continue</Button></div>
     </form>
   );
 }
@@ -183,27 +201,50 @@ function Step4Submit({ draft, activeYear, onSubmit, onBack, isLoading }: { draft
     resolver: zodResolver(wingSchema),
     defaultValues: { wingId: draft.wingSelection || "", declaration: undefined as unknown as true },
   });
+
+  // Fetch wings dynamically from the database
+  const { data: wings, isLoading: wingsLoading } = useQuery<Wing[]>({
+    queryKey: ["wings", activeYear.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/wings?yearId=${activeYear.id}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.message || "Failed to load wings");
+      return json.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left max-w-lg mx-auto">
-      <h3 className="text-xl font-semibold border-b pb-2 mb-4 text-slate-800">4. Wing Endorsement & Submit</h3>
-      <div className="space-y-2"><Label>Primary Wing For Endorsement</Label>
-        <select {...register("wingId")} className="flex h-10 w-full rounded-md border px-3 py-2 text-sm">
-          <option value="">-- Select Wing --</option><option value="wing_1">Evangelism</option><option value="wing_2">Prayer</option>
-        </select>
-        {errors.wingId && <p className="text-sm text-red-500">{errors.wingId.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left w-full h-full">
+      <div className="space-y-2">
+        <Label className="font-semibold text-slate-700">Primary Wing For Endorsement</Label>
+        {wingsLoading ? (
+          <div className="h-12 bg-slate-100 animate-pulse rounded-xl" />
+        ) : (
+          <select {...register("wingId")} className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all px-3 py-2 text-sm outline-none" disabled={isLoading || wingsLoading}>
+            <option value="">-- Select Wing --</option>
+            {(wings || []).map((w) => (
+              <option key={w.id} value={w.id}>{w.name}</option>
+            ))}
+          </select>
+        )}
+        {errors.wingId && <p className="text-sm text-red-500 font-medium">{errors.wingId.message}</p>}
       </div>
-      <div className="p-4 bg-yellow-50 text-sm text-yellow-800 border rounded-md">
-        <Label className="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" {...register("declaration")} className="mt-1" />
-          <span>I declare all info is accurate and accept disqualification rules for false data.</span>
+      <div className="p-6 bg-secondary/10 border border-secondary/20 rounded-xl space-y-4">
+        <Label className="flex items-start gap-4 cursor-pointer">
+          <input type="checkbox" {...register("declaration")} className="mt-1 w-5 h-5 rounded text-primary focus:ring-primary border-slate-300" />
+          <span className="font-semibold text-slate-800 leading-tight block">I declare that all information provided is accurate and verifiable. I accept that providing false data is grounds for disqualification and disciplinary action.</span>
         </Label>
-        {errors.declaration && <p className="text-sm text-red-500">{errors.declaration.message}</p>}
+        {errors.declaration && <p className="text-sm text-red-500 font-medium pl-9">{errors.declaration.message}</p>}
       </div>
-      <div className="pt-6 flex justify-between"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>Back</Button><Button type="submit" isLoading={isLoading} className="bg-green-600">Submit Application</Button></div>
+      <div className="pt-6 flex justify-between gap-4"><Button type="button" variant="ghost" onClick={onBack} disabled={isLoading} className="h-12 w-32 rounded-xl border font-bold">Back</Button><Button type="submit" isLoading={isLoading} className="h-12 flex-1 text-base rounded-xl font-bold bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">Submit Application</Button></div>
     </form>
   );
 }
 
+// ======================
+// MAIN PAGE
+// ======================
 export default function ApplicationFormPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -211,18 +252,26 @@ export default function ApplicationFormPage() {
 
   const { data: activeYear, isLoading: yearIsLoading } = useQuery({
     queryKey: ["activeYear"],
-    queryFn: async () => { const res = await fetch("/api/years/active"); return (await res.json()).data; }
+    queryFn: async () => {
+      const res = await fetch("/api/years/active");
+      return (await res.json()).data;
+    }
   });
 
+  // Use GET to load draft (correct caching semantics)
   const { data: draft, isLoading: draftIsLoading } = useQuery({
     queryKey: ["draft", applicantAuth?.studentId],
     enabled: !!applicantAuth && !!activeYear?.id,
     queryFn: async () => {
-      const res = await fetch("/api/drafts", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ yearId: activeYear.id, studentId: applicantAuth!.studentId, email: applicantAuth!.email })
+      const params = new URLSearchParams({
+        yearId: activeYear.id,
+        studentId: applicantAuth!.studentId,
+        email: applicantAuth!.email,
       });
-      return (await res.json()).data;
+      const res = await fetch(`/api/drafts?${params}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.message || "Failed to load draft");
+      return json.data;
     }
   });
 
@@ -241,7 +290,7 @@ export default function ApplicationFormPage() {
     mutationFn: async (payload: { wingId: string }) => {
       const res = await fetch("/api/applications/submit", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ yearId: activeYear!.id, studentId: applicantAuth!.studentId, draftPayload: { ...draft, wingSelection: payload.wingId }})
+        body: JSON.stringify({ yearId: activeYear!.id, studentId: applicantAuth!.studentId, draftPayload: { ...draft, wingSelection: payload.wingId } })
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.message || "Failed to submit");
@@ -256,21 +305,51 @@ export default function ApplicationFormPage() {
   if (!applicantAuth) return <div className="min-h-screen bg-slate-50 py-24 px-6"><ApplicantLogin activeYearId={activeYear.id} onLogin={setApplicantAuth} /></div>;
   if (draftIsLoading || !draft) return <div className="p-12 text-center">Loading your draft securely...</div>;
 
+  const stepTitles = ["Personal Info", "Academic Record", "Financial & Essays", "Declaration & Endorse"];
+
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex justify-between items-end">
-          <div><h1 className="text-2xl font-bold tracking-tight text-slate-900">Application Form</h1><p className="text-slate-500 text-sm">Draft auto-saves securely for {applicantAuth.studentId}</p></div>
-          <Button variant="ghost" onClick={() => setApplicantAuth(null)}>Exit Portal</Button>
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto space-y-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-none">Application Form</h1>
+            <p className="text-slate-500 text-base mt-2 font-medium">Logged in via: <span className="text-slate-700">{applicantAuth.studentId}</span></p>
+          </div>
+          <Button variant="ghost" onClick={() => setApplicantAuth(null)} className="font-bold border border-slate-200 bg-white hover:bg-slate-50 h-10 px-6 rounded-xl text-slate-600">Save &amp; Exit</Button>
         </div>
-        <div className="flex gap-2 mb-8">
-          {[1, 2, 3, 4].map((step) => <div key={step} className={`h-2 flex-1 rounded-full ${step === draft.currentStep ? "bg-slate-900" : step < draft.currentStep ? "bg-slate-400" : "bg-slate-200"}`} />)}
+
+        {/* Progress Tracker */}
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-4 px-2">
+            {stepTitles.map((title, idx) => (
+              <div key={title} className={`text-xs font-bold uppercase tracking-wider text-center flex-1 ${draft.currentStep === idx + 1 ? "text-primary" : draft.currentStep > idx + 1 ? "text-secondary" : "text-slate-400"}`}>
+                <span className="hidden sm:inline">{title}</span>
+                <span className="sm:hidden">Step {idx + 1}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 h-2">
+            {[1, 2, 3, 4].map((step) => <div key={step} className={`h-full flex-1 rounded-full transition-colors duration-500 ${step === draft.currentStep ? "bg-primary shadow-[0_0_15px_-3px_rgba(30,58,138,0.4)]" : step < draft.currentStep ? "bg-secondary" : "bg-slate-200"}`} />)}
+          </div>
         </div>
-        <div className="bg-white border rounded-xl p-8 shadow-sm">
-          {draft.currentStep === 1 && <Step1Personal draft={draft} isLoading={saveMutation.isPending} onSaveAndNext={(d) => saveMutation.mutate({ personalInfo: d, currentStep: 2 })} />}
-          {draft.currentStep === 2 && <Step2Academic draft={draft} isLoading={saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 1 })} onSaveAndNext={(d) => saveMutation.mutate({ academicInfo: d, currentStep: 3 })} />}
-          {draft.currentStep === 3 && <Step3Financial draft={draft} isLoading={saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 2 })} onSaveAndNext={(d) => saveMutation.mutate({ financialInfo: d, currentStep: 4 })} />}
-          {draft.currentStep === 4 && <Step4Submit draft={draft} activeYear={activeYear} isLoading={submitMutation.isPending || saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 3 })} onSubmit={(d) => { saveMutation.mutate({ wingSelection: d.wingId }, { onSuccess: () => submitMutation.mutate({ wingId: d.wingId }) }) }} />}
+
+        <div className="bg-white border border-slate-100 rounded-3xl p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={draft.currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full pb-2"
+            >
+              <h2 className="text-2xl font-bold mb-8 text-slate-900 border-b border-slate-100 pb-4">{stepTitles[draft.currentStep - 1]}</h2>
+              {draft.currentStep === 1 && <Step1Personal draft={draft} isLoading={saveMutation.isPending} onSaveAndNext={(d) => saveMutation.mutate({ personalInfo: d, currentStep: 2 })} />}
+              {draft.currentStep === 2 && <Step2Academic draft={draft} isLoading={saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 1 })} onSaveAndNext={(d) => saveMutation.mutate({ academicInfo: d, currentStep: 3 })} />}
+              {draft.currentStep === 3 && <Step3Financial draft={draft} isLoading={saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 2 })} onSaveAndNext={(d) => saveMutation.mutate({ financialInfo: d, currentStep: 4 })} />}
+              {draft.currentStep === 4 && <Step4Submit draft={draft} activeYear={activeYear} isLoading={submitMutation.isPending || saveMutation.isPending} onBack={() => saveMutation.mutate({ currentStep: 3 })} onSubmit={(d) => { saveMutation.mutate({ wingSelection: d.wingId }, { onSuccess: () => submitMutation.mutate({ wingId: d.wingId }) }) }} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

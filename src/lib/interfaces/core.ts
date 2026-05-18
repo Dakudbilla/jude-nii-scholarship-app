@@ -76,6 +76,9 @@ export interface Application {
   endorsementToken: string;
   endorsementTokenExpiresAt: any;
   
+  // Endorsement
+  wingHeadComments?: string;
+
   // Assessment
   blindId?: string;       // Anonymized ID generated on submission
   reviewScore?: number;

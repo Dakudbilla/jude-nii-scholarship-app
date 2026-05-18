@@ -1,3 +1,7 @@
+/**
+ * Single source of truth for all React Query cache keys.
+ * Every hook MUST use these — no hardcoded strings in page files.
+ */
 export const QUERY_KEYS = {
   YEARS: "years",
   ACTIVE_YEAR: "activeYear",
@@ -5,5 +9,6 @@ export const QUERY_KEYS = {
   DRAFT: (studentId: string | undefined) => ["draft", studentId],
   APPLICATIONS: (yearId: string) => ["applications", yearId],
   APPLICATION: (appId: string) => ["application", appId],
-  AUDIT_LOGS: (entityId: string) => ["auditLogs", entityId]
+  DASHBOARD: (yearId: string) => ["dashboard", yearId],
+  AUDIT_LOGS: (entityId: string) => ["auditLogs", entityId],
 } as const;
