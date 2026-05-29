@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth/middleware";
 import { yearRepository } from "@/lib/repositories/YearRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";
 
 // GET /api/years (List all years)
-export const GET = withAuth(async (req, context, authContext) => {
+export const GET = withAuth(async (_req, _context, _authContext) => {
   try {
     const years = await yearRepository.getAll();
     return apiSuccess(years);

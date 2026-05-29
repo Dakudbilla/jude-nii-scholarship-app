@@ -1,4 +1,9 @@
-// We use 'any' or 'Date' for timestamps to avoid strict union clashes between client SDK (firebase/firestore) and Admin SDK (firebase-admin)
+// Timestamps arrive in different shapes depending on whether you're reading from
+// the Admin SDK (serialised JSON: { _seconds, _nanoseconds }) or the Client SDK
+// (Timestamp object with .toDate()). We use `unknown` and let lib/utils/date.ts
+// normalise them — avoids unsafe `any` while staying compatible with both SDKs.
+
+import type { PersonalInfo, AcademicInfo, FinancialInfo } from "./application";
 
 export type YearStatus = "SETUP" | "OPEN" | "REVIEW" | "CLOSED";
 
@@ -6,14 +11,14 @@ export interface AcademicYear {
   id: string;
   label: string;
   status: YearStatus;
-  openDate: any;
-  deadline: any;
+  openDate: unknown;
+  deadline: unknown;
   description: string;
   rubric: RubricCriterion[];
   blindReview: boolean;
-  messagingTemplates?: any;
-  createdAt: any;
-  updatedAt: any;
+  messagingTemplates?: Record<string, string>;
+  createdAt: unknown;
+  updatedAt: unknown;
 }
 
 export interface RubricCriterion {
@@ -39,55 +44,58 @@ export interface AuditLog {
   action: string;
   adminId: string;
   adminName: string;
-  previousValue?: any;
-  newValue?: any;
-  timestamp: any;
+  previousValue?: unknown;
+  newValue?: unknown;
+  timestamp: unknown;
 }
 
 export interface ApplicationDraft {
-  id: string;             // yearId_studentId
+  id: string;           // yearId_studentId
   yearId: string;
-  studentId: string;      // typically matriculation/reference number
+  studentId: string;
   email: string;
-  currentStep: number;    // 1-4
-  personalInfo?: any;
-  academicInfo?: any;
-  financialInfo?: any;
+  currentStep: number;  // 1-4
+  personalInfo?: Partial<PersonalInfo>;
+  academicInfo?: Partial<AcademicInfo>;
+  financialInfo?: Partial<FinancialInfo>;
   wingSelection?: string;
-  updatedAt: any;
+  updatedAt: unknown;
 }
 
-export type ApplicationStatus = "PENDING_ENDORSEMENT" | "ENDORSED" | "REJECTED_BY_WING" | "IN_REVIEW" | "INTERVIEW" | "REJECTED" | "AWARDED";
+export type ApplicationStatus =
+  | "PENDING_ENDORSEMENT"
+  | "ENDORSED"
+  | "REJECTED_BY_WING"
+  | "IN_REVIEW"
+  | "INTERVIEW"
+  | "REJECTED"
+  | "AWARDED";
 
 export interface Application {
-  id: string;             // Auto-generated Firestore ID
+  id: string;
   yearId: string;
   studentId: string;
   email: string;
   status: ApplicationStatus;
-  
-  // Payload from draft
-  personalInfo: any;
-  academicInfo: any;
-  financialInfo: any;
+
+  personalInfo: PersonalInfo;
+  academicInfo: AcademicInfo & { cwa?: number };
+  financialInfo: FinancialInfo;
   wingId: string;
-  
-  // Generated on submission
+
   endorsementToken: string;
-  endorsementTokenExpiresAt: any;
-  
-  // Endorsement
+  endorsementTokenExpiresAt: unknown;
+
   wingHeadComments?: string;
 
-  // Assessment
-  blindId?: string;       // Anonymized ID generated on submission
+  blindId?: string;
   reviewScore?: number;
-  
-  createdAt: any;
-  updatedAt: any;
+
+  createdAt: unknown;
+  updatedAt: unknown;
 }
 
-// Repositories
+// ── Repository contracts ──────────────────────────────────────────────────────
 
 export interface IYearRepository {
   getById(id: string): Promise<AcademicYear | null>;

@@ -11,8 +11,8 @@ export class AuditLogService {
     entityType: "AcademicYear" | "Application" | "Wing" | "ReviewScore" | "Award",
     entityId: string,
     action: string,
-    previousValue?: any,
-    newValue?: any
+    previousValue?: unknown,
+    newValue?: unknown
   ): Promise<void> {
     try {
       await auditLogRepository.createAdminLog({

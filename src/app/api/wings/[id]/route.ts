@@ -16,7 +16,7 @@ export const PUT = withAdminAuth(async (req, context, authContext) => {
       return apiError("yearId is required to locate the wing", 400);
     }
 
-    const updates: any = {};
+    const updates: Partial<import("@/lib/interfaces/core").Wing> = {};
     if (headName !== undefined) updates.headName = headName;
     if (headEmail !== undefined) updates.headEmail = headEmail;
     if (headPhone !== undefined) updates.headPhone = headPhone;

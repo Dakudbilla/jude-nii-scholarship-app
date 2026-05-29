@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth/middleware";
 import { applicationRepository } from "@/lib/repositories/ApplicationRepository";
 import { reviewScoreRepository } from "@/lib/repositories/ReviewScoreRepository";
@@ -45,7 +44,7 @@ const VALID_STATUSES: ApplicationStatus[] = [
   "IN_REVIEW", "INTERVIEW", "REJECTED", "AWARDED",
 ];
 
-export const PUT = withAdminAuth(async (req, context, authContext) => {
+export const PUT = withAdminAuth(async (req, context, _authContext) => {
   try {
     const { params } = context as { params: Promise<{ id: string }> };
     const { id: appId } = await params;

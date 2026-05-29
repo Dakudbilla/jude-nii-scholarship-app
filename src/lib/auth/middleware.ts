@@ -7,10 +7,13 @@ export type AuthContext = {
   role: "SUPER_ADMIN" | "ADMIN" | "VIEWER" | "USER";
 };
 
-type Handler = (req: Request, context: any, authContext: AuthContext) => Promise<NextResponse> | NextResponse;
+// The `context` parameter shape varies by route (some have params, some don't),
+// so we intentionally use a loose type here and let each handler cast it.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Handler = (req: Request, context: any, authContext: AuthContext) => Promise<NextResponse>;
 
-export function withAuth(handler: Handler) {
-  return async (req: Request, context: any) => {
+export function withAuth(handler: Handler): (req: Request, context: unknown) => Promise<NextResponse> {
+  return async (req: Request, context: unknown) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: { message: "Missing or invalid authorization header" } }, { status: 401 });
@@ -25,19 +28,18 @@ export function withAuth(handler: Handler) {
       const decodedToken = await adminAuth.verifyIdToken(token);
       const authContext: AuthContext = {
         uid: decodedToken.uid,
-        email: decodedToken.email || "",
-        role: (decodedToken.role as AuthContext["role"]) || "USER",
+        email: decodedToken.email ?? "",
+        role: (decodedToken.role as AuthContext["role"]) ?? "USER",
       };
-      
+
       return handler(req, context, authContext);
-    } catch (error) {
-      console.error("Auth error:", error);
+    } catch {
       return NextResponse.json({ error: { message: "Invalid token" } }, { status: 401 });
     }
   };
 }
 
-export function withAdminAuth(handler: Handler) {
+export function withAdminAuth(handler: Handler): (req: Request, context: unknown) => Promise<NextResponse> {
   return withAuth(async (req, context, authContext) => {
     if (authContext.role !== "SUPER_ADMIN" && authContext.role !== "ADMIN") {
       return NextResponse.json({ error: { message: "Forbidden: Admin access required" } }, { status: 403 });

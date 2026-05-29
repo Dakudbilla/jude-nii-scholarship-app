@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { ApplicationService } from "@/lib/services/ApplicationService";
 import { yearRepository } from "@/lib/repositories/YearRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";
@@ -26,8 +25,9 @@ export async function POST(req: Request) {
       applicationId: application.id, 
       status: application.status 
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Submission failed:", error);
-    return apiError(error.message || "Failed to submit application", 500);
+    const message = error instanceof Error ? error.message : "Failed to submit application";
+    return apiError(message, 500);
   }
 }

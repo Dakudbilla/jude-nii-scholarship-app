@@ -164,14 +164,21 @@ export default function CycleProgressionPage() {
               <p className="text-slate-500 font-medium max-w-lg mx-auto mb-6">
                 This cycle has been finalized. All data is preserved for historical reporting.
               </p>
-              <Button
-                variant="secondary"
-                onClick={() => requestTransition("REVIEW", "Re-open Cycle", "Are you absolutely sure you want to reopen an archived cycle? This may override currently active cycles.", "danger", "Emergency Re-open")}
-                disabled={isMutating}
-                className="font-bold border-slate-300 text-slate-600 hover:bg-white"
-              >
-                Emergency Re-open to Review Phase
-              </Button>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/admin/years">
+                  <Button variant="secondary" className="font-bold border-slate-300 text-slate-600 hover:bg-white h-12 px-8">
+                    ← Back to All Cycles
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={() => requestTransition("REVIEW", "Re-open Cycle", "Are you absolutely sure you want to reopen an archived cycle? This may override currently active cycles.", "danger", "Emergency Re-open")}
+                  disabled={isMutating}
+                  className="font-bold text-red-600 hover:bg-red-50 h-12 px-8 border border-red-200"
+                >
+                  Emergency Re-open to Review Phase
+                </Button>
+              </div>
             </div>
           )}
         </div>

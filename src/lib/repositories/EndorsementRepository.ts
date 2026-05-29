@@ -11,12 +11,23 @@ export class EndorsementRepository implements IEndorsementRepository {
       .where("status", "==", "PENDING_ENDORSEMENT")
       .limit(1)
       .get();
-      
+
     if (snapshot.empty) return null;
-    
+
     const doc = snapshot.docs[0];
     if (!doc) return null;
-    return { id: doc.id, ...doc.data() } as Application;
+
+    const data = doc.data();
+
+    // Enforce token expiry (72-hour window set at submission time)
+    if (data.endorsementTokenExpiresAt) {
+      const expiresAt: Date = data.endorsementTokenExpiresAt.toDate();
+      if (expiresAt < new Date()) {
+        return null;
+      }
+    }
+
+    return { id: doc.id, ...data } as Application;
   }
 
   async endorseApplication(id: string, decision: "ENDORSED" | "REJECTED_BY_WING", comments?: string): Promise<void> {

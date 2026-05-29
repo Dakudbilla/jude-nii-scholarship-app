@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, PartyPopper } from "lucide-react";
+import { ShieldAlert, PartyPopper, ArrowLeft } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 
 function EligibilityQuiz({ onPassed }: { onPassed: () => void }) {
   const [step, setStep] = useState(1);
@@ -124,13 +125,18 @@ export default function ApplyGatePage() {
             {status === "SETUP" ? "Coming Soon" : status === "REVIEW" ? "Under Review" : "Closed Portal"}
           </h1>
           <p className="text-slate-500 mb-8 font-medium">
-            {status === "SETUP" ? "The application cycle is currently being prepared." : 
-             status === "REVIEW" ? "The application window has closed. Submissions are under review." : 
+            {status === "SETUP" ? "The application cycle is currently being prepared." :
+             status === "REVIEW" ? "The application window has closed. Submissions are under review." :
              "We are not currently accepting applications."}
           </p>
-          <Link href="/apply/status" className="inline-flex items-center justify-center w-full h-14 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold shadow-lg transition-all">
-            Check Application Status
-          </Link>
+          <div className="space-y-3">
+            <Link href="/apply/status" className="inline-flex items-center justify-center w-full h-14 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold shadow-lg transition-all">
+              Check Application Status
+            </Link>
+            <Link href="/" className="inline-flex items-center justify-center w-full h-12 rounded-xl text-slate-500 hover:text-slate-800 font-medium transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -139,12 +145,15 @@ export default function ApplyGatePage() {
   // OPEN State
   return (
     <div className="min-h-[100dvh] bg-slate-50 py-16 px-4 sm:px-6 relative overflow-hidden noise">
-      
+
       {/* Background decorations */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto space-y-16 relative z-10 mt-12">
+      <div className="max-w-4xl mx-auto space-y-16 relative z-10 mt-4">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white px-4 py-2 rounded-full shadow-sm ring-1 ring-slate-200/50">
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Link>
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-6"
@@ -163,13 +172,13 @@ export default function ApplyGatePage() {
              <div className="bg-white/60 backdrop-blur-md border border-slate-200 px-6 py-3 rounded-2xl shadow-sm text-sm">
                 <span className="text-slate-500 font-medium block text-xs uppercase tracking-wider mb-1">Applications Open</span>
                 <span className="font-extrabold text-slate-900">
-                  {yearData.openDate ? new Date(yearData.openDate._seconds * 1000).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Not Set"}
+                  {formatDate(yearData.openDate, { weekday: "long", year: "numeric", month: "long", day: "numeric" }) || "Not Set"}
                 </span>
              </div>
              <div className="bg-white/60 backdrop-blur-md border border-slate-200 px-6 py-3 rounded-2xl shadow-sm text-sm">
                 <span className="text-slate-500 font-medium block text-xs uppercase tracking-wider mb-1">Application Deadline</span>
                 <span className="font-extrabold text-red-600">
-                  {yearData.deadline ? new Date(yearData.deadline._seconds * 1000).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Not Set"}
+                  {formatDate(yearData.deadline, { weekday: "long", year: "numeric", month: "long", day: "numeric" }) || "Not Set"}
                 </span>
              </div>
           </div>
@@ -186,8 +195,8 @@ export default function ApplyGatePage() {
             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-green-50/50">
                <PartyPopper className="w-10 h-10 text-green-500" />
             </div>
-            <h3 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">You're Eligible!</h3>
-            <p className="text-slate-500 mb-10 text-lg font-medium leading-relaxed">Let's proceed to the secure application portal to resume or start your draft.</p>
+            <h3 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">You&apos;re Eligible!</h3>
+            <p className="text-slate-500 mb-10 text-lg font-medium leading-relaxed">Let&apos;s proceed to the secure application portal to resume or start your draft.</p>
             <Button size="lg" onClick={() => router.push("/apply/form")} className="h-14 px-10 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 w-full">
               Enter Secure Portal
             </Button>

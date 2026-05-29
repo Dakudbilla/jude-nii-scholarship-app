@@ -13,16 +13,10 @@ import { ApplicationStageStepper } from "@/components/admin/applications/StageSt
 import { StageControlPanel } from "@/components/admin/applications/StageControlPanel";
 import { ApplicationStatus } from "@/lib/interfaces/core";
 import type { PersonalInfo, AcademicInfo, FinancialInfo } from "@/lib/interfaces/application";
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  PENDING_ENDORSEMENT: "Pending Endorsement",
-  ENDORSED: "Endorsed",
-  REJECTED_BY_WING: "Rejected by Wing",
-  IN_REVIEW: "In Review",
-  INTERVIEW: "Shortlisted for Interview",
-  REJECTED: "Rejected",
-  AWARDED: "Awarded",
-};
+import type { ReviewScore } from "@/lib/repositories/ReviewScoreRepository";
+import { DetailSection, InfoTile, EssayBlock } from "@/components/admin/applications/ApplicationDetailSections";
+import { getStatusConfig } from "@/lib/constants/statusConfig";
+import { User, GraduationCap, DollarSign, Church, Star } from "lucide-react";
 
 export default function ApplicationReviewPage() {
   const params = useParams();
@@ -41,12 +35,12 @@ export default function ApplicationReviewPage() {
 
   useEffect(() => {
     if (data?.myScore) {
-      setCriteriaScores(data.myScore.criteriaScores || {});
-      setComments(data.myScore.comments || "");
+      setCriteriaScores(data.myScore.criteriaScores ?? {});
+      setComments(data.myScore.comments ?? "");
     } else if (data?.rubric) {
-      const initScores: Record<string, number> = {};
-      data.rubric.forEach((r) => (initScores[r.name] = 0));
-      setCriteriaScores(initScores);
+      const initial: Record<string, number> = {};
+      data.rubric.forEach((r) => (initial[r.name] = 0));
+      setCriteriaScores(initial);
     }
   }, [data]);
 
@@ -64,7 +58,7 @@ export default function ApplicationReviewPage() {
     onSuccess: (_, status) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.APPLICATION(appId) });
       queryClient.invalidateQueries({ queryKey: ["applications"] });
-      toast.success(`Status updated to: ${STATUS_LABELS[status]}`);
+      toast.success(`Status updated to: ${getStatusConfig(status).label}`);
       router.push("/admin/applications");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -74,14 +68,15 @@ export default function ApplicationReviewPage() {
   if (isError || !data?.application) return <div className="p-12 text-center text-red-500">Failed to load application.</div>;
 
   const app = data.application;
-  const rubric = data.rubric || [];
+  const rubric = data.rubric ?? [];
   const isBlind = data.isBlind;
-  const personalInfo: PersonalInfo = app.personalInfo ?? {};
-  const academicInfo: AcademicInfo = app.academicInfo ?? {};
-  const financialInfo: FinancialInfo = app.financialInfo ?? {};
+  const scores: ReviewScore[] = (data as { scores?: ReviewScore[] }).scores ?? [];
+  const personalInfo = (app.personalInfo ?? {}) as PersonalInfo;
+  const academicInfo = (app.academicInfo ?? {}) as AcademicInfo & { cwa?: number };
+  const financialInfo = (app.financialInfo ?? {}) as FinancialInfo;
 
   const totalScore = Object.values(criteriaScores).reduce((a, b) => a + Number(b), 0);
-  const potentialMaxScore = rubric.reduce((a, b) => a + Number(b.weight), 0);
+  const maxScore = rubric.reduce((a, b) => a + Number(b.weight), 0);
   const isMutating = statusMutation.isPending || scoreMutation.isPending;
 
   return (
@@ -97,7 +92,7 @@ export default function ApplicationReviewPage() {
         <div>
           {isBlind ? (
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2 font-mono bg-slate-100 px-3 py-1 rounded inline-block">
-              {app.blindId || "ANON-????"}
+              {app.blindId ?? "ANON-????"}
             </h1>
           ) : (
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
@@ -105,12 +100,19 @@ export default function ApplicationReviewPage() {
             </h1>
           )}
           <div className="flex flex-wrap items-center gap-3 mt-2">
-            <span className="text-slate-500 text-sm font-medium">
-              {isBlind ? "Student ID Hidden" : app.studentId} • {academicInfo.programme} (Yr {academicInfo.year})
-            </span>
+            {!isBlind && (
+              <span className="text-slate-500 text-sm font-medium">
+                {app.studentId} • {app.email}
+              </span>
+            )}
             {isBlind && (
               <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full ring-1 ring-indigo-200 font-bold uppercase tracking-wider">
                 Blind Review Active
+              </span>
+            )}
+            {app.reviewScore != null && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 text-xs rounded-full ring-1 ring-amber-200 font-bold">
+                <Star className="w-3 h-3" /> Avg Score: {app.reviewScore} / {maxScore}
               </span>
             )}
           </div>
@@ -118,7 +120,7 @@ export default function ApplicationReviewPage() {
       </div>
 
       {/* Stage Progress + Control Panel */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm mb-8">
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Application Progress</h3>
         <ApplicationStageStepper status={app.status as ApplicationStatus} />
         <div className="mt-8 pt-8 border-t border-slate-100">
@@ -132,17 +134,45 @@ export default function ApplicationReviewPage() {
 
       {/* Detail Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column */}
         <div className="lg:col-span-2 space-y-8">
-          <DetailSection title="Financial Hardship">
+
+          {/* Personal Information */}
+          {!isBlind && (
+            <DetailSection title="Personal Information" icon={<User className="w-5 h-5 text-slate-400" />}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                <InfoTile label="Full Name"     value={personalInfo.fullName} />
+                <InfoTile label="Date of Birth" value={personalInfo.dateOfBirth} />
+                <InfoTile label="Gender"        value={personalInfo.gender} />
+                <InfoTile label="Hometown"      value={personalInfo.hometown} />
+                <InfoTile label="Phone Number"  value={personalInfo.phoneNumber} />
+                <InfoTile label="Guardian Name" value={personalInfo.guardianName} />
+                <InfoTile label="Guardian Phone" value={personalInfo.guardianPhone} />
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Academic Information */}
+          <DetailSection title="Academic Information" icon={<GraduationCap className="w-5 h-5 text-slate-400" />}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <InfoTile label="Programme"    value={academicInfo.programme} />
+              <InfoTile label="Year"         value={academicInfo.year ? `Year ${academicInfo.year}` : undefined} />
+              <InfoTile label="Index Number" value={isBlind ? "Hidden" : (academicInfo.indexNumber ?? "—")} />
+              <InfoTile label="Faculty"      value={academicInfo.faculty} />
+              {academicInfo.cwa != null && <InfoTile label="CWA" value={String(academicInfo.cwa)} />}
+            </div>
+          </DetailSection>
+
+          {/* Financial Hardship */}
+          <DetailSection title="Financial Hardship" icon={<DollarSign className="w-5 h-5 text-slate-400" />}>
             <div className="grid grid-cols-2 gap-6 text-sm mb-4">
-              <InfoTile label="Sponsor Status" value={financialInfo.sponsorStatus} />
+              <InfoTile label="Sponsor Status"    value={financialInfo.sponsorStatus} />
               <InfoTile label="Other Scholarship" value={financialInfo.hasOtherScholarship ? "Yes" : "No"} />
             </div>
             <EssayBlock label="Hardship Essay" text={financialInfo.hardshipEssay} />
           </DetailSection>
 
-          <DetailSection title="Church Activeness">
+          {/* Church Activeness */}
+          <DetailSection title="Church Activeness" icon={<Church className="w-5 h-5 text-slate-400" />}>
             <EssayBlock label="Essay / Explanation" text={financialInfo.churchEssay} />
             {app.wingHeadComments && (
               <div className="mt-6">
@@ -155,9 +185,36 @@ export default function ApplicationReviewPage() {
               </div>
             )}
           </DetailSection>
+
+          {/* All Reviewer Scores */}
+          {scores.length > 0 && (
+            <DetailSection title="All Reviewer Scores" icon={<Star className="w-5 h-5 text-slate-400" />}>
+              <div className="space-y-3">
+                {scores.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <div className="font-bold text-slate-800 text-sm">{s.adminName}</div>
+                      {s.comments && <div className="text-slate-500 text-xs mt-1 italic">{s.comments}</div>}
+                    </div>
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-black rounded-lg">
+                      {s.totalScore} / {maxScore}
+                    </span>
+                  </div>
+                ))}
+                {scores.length > 1 && (
+                  <div className="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                    <span className="font-bold text-amber-800 text-sm uppercase tracking-wider">Average Score</span>
+                    <span className="px-3 py-1 bg-amber-200 text-amber-900 text-sm font-black rounded-lg">
+                      {(scores.reduce((sum, s) => sum + s.totalScore, 0) / scores.length).toFixed(1)} / {maxScore}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </DetailSection>
+          )}
         </div>
 
-        {/* Right Column: Scorecard */}
+        {/* Scorecard (sticky right column) */}
         <div className="bg-white border text-left p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] space-y-8 self-start sticky top-8 border-primary/10">
           <h3 className="text-2xl font-extrabold tracking-tight text-primary mb-2 border-b border-slate-100 pb-4">
             Rubric Scorecard
@@ -172,7 +229,7 @@ export default function ApplicationReviewPage() {
                   <div className="flex justify-between items-end">
                     <Label className="font-bold text-slate-800 text-base">{r.name}</Label>
                     <span className="px-3 py-1 bg-secondary/10 text-secondary text-sm font-black rounded-lg">
-                      {criteriaScores[r.name] || 0} / {r.weight}
+                      {criteriaScores[r.name] ?? 0} / {r.weight}
                     </span>
                   </div>
                   <p className="text-sm text-slate-500 mb-4">{r.description}</p>
@@ -180,7 +237,7 @@ export default function ApplicationReviewPage() {
                     type="range"
                     min="0"
                     max={r.weight}
-                    value={criteriaScores[r.name] || 0}
+                    value={criteriaScores[r.name] ?? 0}
                     onChange={(e) =>
                       setCriteriaScores((prev) => ({ ...prev, [r.name]: parseInt(e.target.value) }))
                     }
@@ -196,7 +253,7 @@ export default function ApplicationReviewPage() {
             <div className="flex justify-between items-center text-lg bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <span className="font-extrabold text-slate-700 tracking-wide uppercase text-sm">Total Score</span>
               <span className="font-black text-primary text-3xl">
-                {totalScore} <span className="text-lg text-slate-400 font-bold">/ {potentialMaxScore}</span>
+                {totalScore} <span className="text-lg text-slate-400 font-bold">/ {maxScore}</span>
               </span>
             </div>
 
@@ -215,43 +272,13 @@ export default function ApplicationReviewPage() {
               className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20"
               onClick={() => scoreMutation.mutate()}
               isLoading={scoreMutation.isPending}
+              disabled={rubric.length === 0}
             >
               {data?.myScore ? "Update Scorecard" : "Save Final Score"}
             </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ── Local presentational sub-components (pure display, no logic) ──────────
-
-function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white border border-slate-100 text-left p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
-      <h3 className="text-2xl font-bold border-b border-slate-100 pb-4 text-slate-900 tracking-tight">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="bg-slate-50 p-4 rounded-2xl">
-      <span className="text-slate-500 block font-medium mb-1">{label}</span>
-      <span className="font-bold text-lg text-slate-900">{value}</span>
-    </div>
-  );
-}
-
-function EssayBlock({ label, text }: { label: string; text?: string }) {
-  return (
-    <div>
-      <span className="text-secondary block text-xs font-bold uppercase tracking-widest mb-3">{label}</span>
-      <p className="bg-slate-50/50 border border-slate-100 p-6 rounded-2xl text-slate-700 text-base leading-relaxed italic">
-        {text || <span className="text-slate-400 not-italic">Not provided.</span>}
-      </p>
     </div>
   );
 }
