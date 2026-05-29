@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { AcademicYear } from "@/lib/interfaces/core";
+import { formatDate } from "@/lib/utils/date";
 
 export default function GlobalYearsDirectoryPage() {
   const { years, isLoading, isError } = useYears();
@@ -25,7 +26,7 @@ export default function GlobalYearsDirectoryPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         
         <Link href="/admin" className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to System Hub
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Cycle Selection
         </Link>
 
         <div className="flex justify-between items-end">
@@ -91,19 +92,11 @@ function YearCard({ year }: { year: AcademicYear }) {
       <div className="grid grid-cols-2 gap-4 text-sm mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
         <div>
           <span className="text-slate-400 block mb-1 text-xs uppercase tracking-wider font-bold">Opens</span>
-          <span className="font-bold text-slate-800">
-            {year.openDate && typeof year.openDate === "object" && "toDate" in year.openDate 
-              ? year.openDate.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) 
-              : "Not set"}
-          </span>
+          <span className="font-bold text-slate-800">{formatDate(year.openDate) || "Not set"}</span>
         </div>
         <div>
           <span className="text-slate-400 block mb-1 text-xs uppercase tracking-wider font-bold">Deadline</span>
-          <span className="font-bold text-slate-800">
-            {year.deadline && typeof year.deadline === "object" && "toDate" in year.deadline 
-              ? year.deadline.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) 
-              : "Not set"}
-          </span>
+          <span className="font-bold text-slate-800">{formatDate(year.deadline) || "Not set"}</span>
         </div>
       </div>
 

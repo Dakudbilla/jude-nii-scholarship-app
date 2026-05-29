@@ -1,5 +1,6 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { applicationRepository } from "./ApplicationRepository";
 
 export interface ReviewScore {
   id: string;
@@ -9,8 +10,8 @@ export interface ReviewScore {
   criteriaScores: { [criterionName: string]: number }; // score out of 5 usually
   totalScore: number;
   comments?: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: unknown;
+  updatedAt: unknown;
 }
 
 export interface IReviewScoreRepository {
@@ -41,9 +42,8 @@ export class ReviewScoreRepository implements IReviewScoreRepository {
   }
 
   async saveScore(applicationId: string, adminId: string, adminName: string, data: Partial<ReviewScore>): Promise<void> {
-    // Generate deterministic ID so one admin = one score per app
     const id = `${applicationId}_${adminId}`;
-    
+
     await this.collection.doc(id).set({
       applicationId,
       adminId,
@@ -51,9 +51,17 @@ export class ReviewScoreRepository implements IReviewScoreRepository {
       ...data,
       updatedAt: FieldValue.serverTimestamp()
     }, { merge: true });
-    
-    // In a real implementation we would also update the Application's average total score here 
-    // using a transaction, but for this constraint we keep it simple.
+
+    // Recompute the application's average review score across all reviewers
+    await this.syncAverageScore(applicationId);
+  }
+
+  private async syncAverageScore(applicationId: string): Promise<void> {
+    const scores = await this.getByApplication(applicationId);
+    if (scores.length === 0) return;
+
+    const avg = scores.reduce((sum, s) => sum + (s.totalScore || 0), 0) / scores.length;
+    await applicationRepository.update(applicationId, { reviewScore: Math.round(avg * 10) / 10 });
   }
 }
 

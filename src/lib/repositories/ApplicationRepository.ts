@@ -55,7 +55,14 @@ export class ApplicationRepository implements IApplicationRepository {
       updatedAt: FieldValue.serverTimestamp()
     });
   }
-  
+
+  async update(id: string, data: Partial<Omit<Application, "id" | "createdAt">>): Promise<void> {
+    await this.collection.doc(id).update({
+      ...data,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+  }
+
   // Custom method needed for transactions when upgrading draft to application
   getCollectionRef() {
     return this.collection;

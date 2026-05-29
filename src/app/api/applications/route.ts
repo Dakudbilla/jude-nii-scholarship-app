@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth/middleware";
 import { applicationRepository } from "@/lib/repositories/ApplicationRepository";
 import { yearRepository } from "@/lib/repositories/YearRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";
 
-export const GET = withAdminAuth(async (req, context, authContext) => {
+export const GET = withAdminAuth(async (req, _context, _authContext) => {
   try {
     const { searchParams } = new URL(req.url);
     let yearId = searchParams.get("yearId");
@@ -19,10 +18,7 @@ export const GET = withAdminAuth(async (req, context, authContext) => {
     const applications = await applicationRepository.getByYear(yearId);
     
     // We don't blind review in the list view typically, but we should strip secure tokens
-    const safeApps = applications.map(app => {
-      const { endorsementToken, endorsementTokenExpiresAt, ...safeApp } = app as any;
-      return safeApp;
-    });
+    const safeApps = applications.map(({ endorsementToken: _t, endorsementTokenExpiresAt: _e, ...safeApp }) => safeApp);
 
     return apiSuccess(safeApps);
   } catch (error) {

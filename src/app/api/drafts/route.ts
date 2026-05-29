@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { draftRepository } from "@/lib/repositories/DraftRepository";
 import { yearRepository } from "@/lib/repositories/YearRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";

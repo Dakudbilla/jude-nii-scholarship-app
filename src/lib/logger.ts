@@ -1,9 +1,5 @@
-function isBrowser() {
-  return typeof window !== "undefined";
-}
-
 class Logger {
-  info(message: string, meta?: any) {
+  info(message: string, meta?: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.info(message, meta);
     } else {
@@ -11,7 +7,7 @@ class Logger {
     }
   }
 
-  error(message: string, meta?: any) {
+  error(message: string, meta?: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.error(message, meta);
     } else {
@@ -19,7 +15,7 @@ class Logger {
     }
   }
 
-  warn(message: string, meta?: any) {
+  warn(message: string, meta?: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.warn(message, meta);
     } else {

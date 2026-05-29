@@ -1,6 +1,5 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { applicationRepository } from "../repositories/ApplicationRepository";
-import { draftRepository } from "../repositories/DraftRepository";
 import { Application, ApplicationDraft } from "../interfaces/core";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import * as crypto from "crypto";
@@ -10,7 +9,7 @@ export class ApplicationService {
    * Idempotent submission: Upgrades a Draft to a Final Application using a transaction.
    * If an application already exists for this yearId + studentId, it aborts.
    */
-  static async submit(yearId: string, studentId: string, payload: any): Promise<Application> {
+  static async submit(yearId: string, studentId: string, payload: Partial<ApplicationDraft> & { wingId?: string }): Promise<Application> {
     const draftId = `${yearId}_${studentId}`;
     const draftRef = adminDb.collection("applicationDrafts").doc(draftId);
     
@@ -53,13 +52,13 @@ export class ApplicationService {
       const newApp: Omit<Application, "id"> = {
         yearId,
         studentId,
-        email: draft.email || payload.email,
+        email: (draft.email || payload.email) as string,
         status: "PENDING_ENDORSEMENT",
-        
-        personalInfo: payload.personalInfo || draft.personalInfo,
-        academicInfo: payload.academicInfo || draft.academicInfo,
-        financialInfo: payload.financialInfo || draft.financialInfo,
-        wingId: payload.wingId || draft.wingSelection,
+
+        personalInfo: (payload.personalInfo || draft.personalInfo) as Application["personalInfo"],
+        academicInfo: (payload.academicInfo || draft.academicInfo) as Application["academicInfo"],
+        financialInfo: (payload.financialInfo || draft.financialInfo) as Application["financialInfo"],
+        wingId: (payload.wingId || draft.wingSelection) as string,
         
         endorsementToken: token, // Note: For production, we should hash this in DB and send raw via email
         endorsementTokenExpiresAt: Timestamp.fromDate(expiresAt),

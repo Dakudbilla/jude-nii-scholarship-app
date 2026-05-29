@@ -35,7 +35,7 @@ export const POST = withAdminAuth(async (req, context, authContext) => {
     const year = await yearRepository.create(yearData);
     
     // 3. Batch create wings under the new Academic Year subcollection
-    const wingsData = wings.map((w: any) => ({
+    const wingsData = (wings as Array<{ name: string; headName: string; headPhone: string; headEmail: string }>).map((w) => ({
       name: w.name,
       isActive: true, // Always active upon creation
       headName: w.headName,
@@ -56,8 +56,9 @@ export const POST = withAdminAuth(async (req, context, authContext) => {
     );
     
     return apiSuccess(year);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Year setup error:", error);
-    return apiError(error.message || "Failed to setup academic year", 500);
+    const message = error instanceof Error ? error.message : "Failed to setup academic year";
+    return apiError(message, 500);
   }
 });

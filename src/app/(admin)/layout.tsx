@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import Link from "next/link";
-import { LayoutDashboard, Users, FolderOpen, Award, Shield, FileText, Settings, LogOut, RefreshCcw } from "lucide-react";
+import { LayoutDashboard, Users, Award, Shield, FileText, BarChart3, LogOut, RefreshCcw } from "lucide-react";
 import { CycleProvider, useCycle } from "@/providers/CycleProvider";
 import { ToastProvider } from "@/components/ui/toast";
 
@@ -78,7 +78,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     { label: "Wings", href: "/admin/wings", icon: Users },
     { label: "Endorsements", href: "/admin/endorsements", icon: Shield },
     { label: "Awards", href: "/admin/awards", icon: Award },
-    { label: "Reports", href: "/admin/reports", icon: Settings },
+    { label: "Reports", href: "/admin/reports", icon: BarChart3 },
   ];
 
   return (
@@ -127,10 +127,11 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             <span className="text-sm font-medium">Switch Cycle</span>
           </button>
           
-          <button 
+          <button
             onClick={() => {
               clearCycle();
               auth.signOut();
+              router.push("/");
             }}
             className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors text-slate-400"
           >

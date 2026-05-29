@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 if (fs.existsSync('.env.local')) {
   fs.readFileSync('.env.local', 'utf-8').split('\n').forEach(line => {

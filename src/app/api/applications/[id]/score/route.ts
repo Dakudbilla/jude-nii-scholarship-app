@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth/middleware";
 import { reviewScoreRepository } from "@/lib/repositories/ReviewScoreRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";

@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -34,7 +35,7 @@ export default function AdminLoginPage() {
       // Force token refresh to get latest claims
       await userCredential.user.getIdToken(true);
       router.push("/admin");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError("Invalid credentials. You must be an authorized admin to log in.");
     } finally {
@@ -44,6 +45,9 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex bg-animated min-h-screen flex-col items-center justify-center p-6 sm:p-24 relative overflow-hidden noise">
+      <Link href="/" className="absolute top-6 left-6 inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-white transition-colors z-20">
+        <ArrowLeft className="w-4 h-4" /> Back to Home
+      </Link>
       
       {/* Background decorations */}
       <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-secondary/10 blur-[130px] rounded-full pointer-events-none" />

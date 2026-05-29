@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { endorsementRepository } from "@/lib/repositories/EndorsementRepository";
+import { wingRepository } from "@/lib/repositories/WingRepository";
 import { apiError, apiSuccess } from "@/lib/api/response";
 
 export async function GET(req: Request, context: { params: Promise<{ token: string }> }) {
@@ -10,14 +10,24 @@ export async function GET(req: Request, context: { params: Promise<{ token: stri
     if (!application) {
       return apiError("Invalid, expired, or already processed endorsement link.", 404);
     }
-    
-    // We don't expose full docs, just the information needed to endorse
+
+    // Resolve the wing name so the portal can show it
+    let wingName: string | null = null;
+    if (application.wingId && application.yearId) {
+      const wings = await wingRepository.getByYearId(application.yearId);
+      const wing = wings.find((w) => w.id === application.wingId);
+      wingName = wing?.name ?? null;
+    }
+
     return apiSuccess({
       id: application.id,
       studentName: application.personalInfo?.fullName,
       studentId: application.studentId,
       programme: application.academicInfo?.programme,
+      faculty: application.academicInfo?.faculty,
+      year: application.academicInfo?.year,
       churchEssay: application.financialInfo?.churchEssay,
+      wingName,
       status: application.status,
     });
   } catch (error) {

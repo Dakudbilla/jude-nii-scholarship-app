@@ -5,7 +5,8 @@ import { useYears } from "@/hooks/useYears";
 import { useCycle } from "@/providers/CycleProvider";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/firebase/client";
-import { FolderOpen, Plus, ShieldCheck, Clock, LogOut } from "lucide-react";
+import { FolderOpen, Plus, ShieldCheck, Clock, LogOut, ArrowLeft } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 import Link from "next/link";
 
 export default function CycleSelectionPage() {
@@ -40,13 +41,18 @@ export default function CycleSelectionPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 md:p-16 flex flex-col relative">
+      <div className="absolute top-8 left-8">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-slate-700 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Home
+        </Link>
+      </div>
       <div className="absolute top-8 right-8 flex gap-3">
         <Link href="/admin/years">
           <Button variant="secondary" className="border-slate-200 text-slate-700 hover:bg-white bg-white/50 font-bold shadow-sm">
             <FolderOpen className="w-4 h-4 mr-2" /> Manage System Cycles
           </Button>
         </Link>
-        <Button variant="ghost" className="text-slate-500 hover:bg-slate-200" onClick={() => auth.signOut()}>
+        <Button variant="ghost" className="text-slate-500 hover:bg-slate-200" onClick={() => { auth.signOut(); router.push("/"); }}>
           <LogOut className="w-4 h-4 mr-2" /> Sign Out
         </Button>
       </div>
@@ -118,7 +124,7 @@ export default function CycleSelectionPage() {
                 <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-slate-400 group-hover:text-slate-600 transition-colors">
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     <Clock className="w-4 h-4" />
-                    <span>Updated {new Date(year.updatedAt?.seconds ? year.updatedAt.seconds * 1000 : Date.now()).toLocaleDateString()}</span>
+                    <span>Updated {formatDate(year.updatedAt)}</span>
                   </div>
                   <span className="font-bold text-sm">Enter Workspace &rarr;</span>
                 </div>

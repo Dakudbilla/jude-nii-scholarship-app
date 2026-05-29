@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, UserCheck, XCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
@@ -39,7 +40,7 @@ export default function EndorsementPortalPage() {
     onSuccess: () => {
       setSubmitted(true);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       alert("Error: " + err.message);
     }
   });
@@ -52,24 +53,35 @@ export default function EndorsementPortalPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 noise relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
-        
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-12 rounded-3xl border border-slate-100 shadow-[0_20px_60px_rgb(0,0,0,0.06)] max-w-lg w-full text-center relative z-10">
           {submitted ? (
             <>
               <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-green-50/50">
-                 <ShieldCheck className="w-10 h-10 text-green-500" />
+                <ShieldCheck className="w-10 h-10 text-green-500" />
               </div>
               <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">Decision Recorded</h2>
-              <p className="text-slate-500 font-medium leading-relaxed">Thank you for endorsing or reviewing this applicant. Your response has been securely saved. You may now close this window.</p>
+              <p className="text-slate-500 font-medium leading-relaxed mb-8">
+                Thank you. Your endorsement decision has been securely saved and the scholarship committee has been notified.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center h-12 px-8 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors text-sm"
+              >
+                Return to Home
+              </Link>
             </>
           ) : (
             <>
               <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-red-50/50">
-                 <XCircle className="w-10 h-10 text-red-500" />
+                <XCircle className="w-10 h-10 text-red-500" />
               </div>
               <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-3">Link Invalid or Expired</h2>
-              <p className="text-slate-500 font-medium">
-                {(error as Error)?.message || "This endorsement link has already been processed, expired, or does not exist."}
+              <p className="text-slate-500 font-medium mb-8">
+                {(error as Error)?.message || "This endorsement link has already been used, expired, or does not exist."}
+              </p>
+              <p className="text-xs text-slate-400">
+                If you believe this is an error, please contact the scholarship administrator to request a new link.
               </p>
             </>
           )}
@@ -94,7 +106,7 @@ export default function EndorsementPortalPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">Applicant Endorsement</h1>
           <p className="text-slate-500 max-w-xl mx-auto font-medium text-lg">
-            Please review the applicant's record of church activeness below and provide your honest endorsement.
+            Please review the applicant&apos;s record of church activeness below and provide your honest endorsement.
           </p>
         </div>
 
@@ -107,7 +119,7 @@ export default function EndorsementPortalPage() {
                 <UserCheck className="w-5 h-5 text-primary" />
                 <h3 className="font-bold text-slate-800 text-lg">Applicant Identity</h3>
              </div>
-             <div className="grid sm:grid-cols-2 gap-6 bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+             <div className="grid sm:grid-cols-2 gap-4 bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
                 <div>
                   <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Full Name</span>
                   <span className="text-lg font-extrabold text-slate-900">{application.studentName}</span>
@@ -116,20 +128,32 @@ export default function EndorsementPortalPage() {
                   <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Ref Number</span>
                   <span className="text-lg font-extrabold text-slate-900">{application.studentId}</span>
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Programme</span>
-                  <span className="text-lg font-extrabold text-slate-900">{application.programme}</span>
+                  <span className="text-base font-bold text-slate-900">{application.programme}</span>
                 </div>
+                <div>
+                  <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Year of Study</span>
+                  <span className="text-base font-bold text-slate-900">{application.year ? `Year ${application.year}` : "—"}</span>
+                </div>
+                {application.wingName && (
+                  <div className="sm:col-span-2">
+                    <span className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Selected Wing</span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-secondary/10 text-secondary text-sm font-bold ring-1 ring-secondary/20">
+                      {application.wingName}
+                    </span>
+                  </div>
+                )}
              </div>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
                <FileText className="w-5 h-5 text-primary" />
-               <span className="block font-bold text-lg text-slate-800">Applicant's Church Activeness Statement</span>
+               <span className="block font-bold text-lg text-slate-800">Applicant&apos;s Church Activeness Statement</span>
             </div>
             <div className="bg-slate-50/80 p-8 rounded-2xl border border-slate-200 text-slate-700 italic leading-relaxed text-base shadow-inner">
-              "{application.churchEssay || "The applicant did not provide a statement."}"
+              &ldquo;{application.churchEssay || "The applicant did not provide a statement."}&rdquo;
             </div>
           </div>
 

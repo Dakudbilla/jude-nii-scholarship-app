@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 import { z } from "zod";
 import { apiError, apiSuccess } from "@/lib/api/response";
@@ -31,8 +30,9 @@ export async function POST(req: Request) {
     await adminAuth.setCustomUserClaims(user.uid, { role });
     
     return apiSuccess({ message: `Successfully assigned role ${role} to ${email}`, uid: user.uid });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Setup error:", error);
-    return apiError(error.message || "Failed to setup claims", 500);
+    const message = error instanceof Error ? error.message : "Failed to setup claims";
+    return apiError(message, 500);
   }
 }
