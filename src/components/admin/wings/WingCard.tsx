@@ -42,7 +42,7 @@ export function WingCard({ wing, onEdit, onToggleActive, isUpdating }: WingCardP
           <button
             onClick={onEdit}
             aria-label="Edit wing"
-            className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800"
+            className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800 cursor-pointer"
           >
             <Pencil className="w-4 h-4" />
           </button>
@@ -50,7 +50,7 @@ export function WingCard({ wing, onEdit, onToggleActive, isUpdating }: WingCardP
             onClick={onToggleActive}
             disabled={isUpdating}
             aria-label={wing.isActive ? "Deactivate wing" : "Activate wing"}
-            className={`p-2 rounded-xl transition-colors ${
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${
               wing.isActive
                 ? "hover:bg-red-50 text-slate-400 hover:text-red-500"
                 : "hover:bg-green-50 text-slate-400 hover:text-green-500"

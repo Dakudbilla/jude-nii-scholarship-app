@@ -41,7 +41,7 @@ export function ApplicantLogin({ activeYearId, onLogin }: ApplicantLoginProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-lg mx-auto"
+      className="bg-white p-6 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-lg mx-auto"
     >
       <h2 className="text-3xl font-extrabold mb-3 text-slate-900 tracking-tight">Resume or Start</h2>
       <p className="text-slate-500 text-base mb-8 leading-relaxed">

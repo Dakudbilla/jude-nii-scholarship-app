@@ -15,6 +15,7 @@ import { Step2Academic } from "@/components/apply/Step2Academic";
 import { Step3Financial } from "@/components/apply/Step3Financial";
 import { Step4Submit } from "@/components/apply/Step4Submit";
 import type { AcademicYear } from "@/lib/interfaces/core";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const STEP_TITLES = ["Personal Info", "Academic Record", "Financial & Essays", "Declaration & Endorse"];
 
@@ -23,6 +24,7 @@ export default function ApplicationFormPage() {
   const queryClient = useQueryClient();
   const [applicantAuth, setApplicantAuth] = useState<{ studentId: string; email: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const { data: activeYear, isLoading: yearIsLoading } = useQuery({
     queryKey: [QUERY_KEYS.ACTIVE_YEAR],
@@ -96,12 +98,9 @@ export default function ApplicationFormPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => router.push("/")} className="font-bold text-slate-400 hover:text-slate-700 h-10 px-4 rounded-xl text-sm">
-              ← Home
-            </Button>
             <Button
               variant="ghost"
-              onClick={() => setApplicantAuth(null)}
+              onClick={() => setShowExitConfirm(true)}
               className="font-bold border border-slate-200 bg-white hover:bg-slate-50 h-10 px-6 rounded-xl text-slate-600"
             >
               Save &amp; Exit
@@ -145,7 +144,7 @@ export default function ApplicationFormPage() {
         </div>
 
         {/* Step card */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
           {submitError && (
             <div className="bg-red-50 text-red-800 text-sm font-semibold p-4 rounded-xl mb-6 border border-red-100">
               {submitError}
@@ -206,6 +205,20 @@ export default function ApplicationFormPage() {
           </AnimatePresence>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showExitConfirm}
+        title="Exit Application?"
+        description="Your completed steps are already saved. Any unsaved edits on the current step will be lost. Are you sure you want to exit?"
+        confirmLabel="Save & Exit"
+        cancelLabel="Keep Editing"
+        variant="warning"
+        onConfirm={() => {
+          setApplicantAuth(null);
+          router.push("/");
+        }}
+        onCancel={() => setShowExitConfirm(false)}
+      />
     </div>
   );
 }

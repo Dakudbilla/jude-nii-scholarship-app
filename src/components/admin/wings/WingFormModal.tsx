@@ -62,7 +62,7 @@ export function WingFormModal({ wing, onSave, onClose, isSaving }: WingFormModal
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700"
+            className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

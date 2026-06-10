@@ -121,7 +121,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
               clearCycle();
               router.push("/admin");
             }}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-white/10 hover:text-white transition-colors text-slate-400"
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-white/10 hover:text-white transition-colors text-slate-400 cursor-pointer"
           >
             <RefreshCcw className="w-5 h-5" />
             <span className="text-sm font-medium">Switch Cycle</span>
@@ -133,7 +133,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
               auth.signOut();
               router.push("/");
             }}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors text-slate-400"
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors text-slate-400 cursor-pointer"
           >
             <LogOut className="w-5 h-5" />
             <span className="text-sm font-medium">Sign Out</span>

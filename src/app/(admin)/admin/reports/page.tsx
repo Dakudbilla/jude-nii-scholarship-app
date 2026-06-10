@@ -111,7 +111,7 @@ export default function AdminReportsPage() {
         />
         <button
           onClick={handleExportCSV}
-          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
         >
           Export CSV
         </button>
