@@ -63,7 +63,7 @@ export default function Home() {
               <motion.div variants={fadeUp} className="flex items-center gap-3 mb-7">
                 <div className="w-6 h-px bg-secondary" />
                 <span className="text-xs tracking-[0.2em] uppercase font-semibold text-slate-500">
-                  NUPS-G KNUST · Est. 1964
+                  NUPS-G KNUST · Est. 1962
                 </span>
               </motion.div>
 
