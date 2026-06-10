@@ -64,7 +64,14 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   }, [loading, isReady, pathname, selectedCycle, router]);
 
   if (loading || !isReady) {
-    return <div className="h-screen w-full flex items-center justify-center bg-slate-50">Loading...</div>;
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#FAF9F6]">
+        <div className="text-center">
+          <div className="w-7 h-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs text-slate-400 font-medium">Loading…</p>
+        </div>
+      </div>
+    );
   }
 
   // Dont show sidebar on exempt pages

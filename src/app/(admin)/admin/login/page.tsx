@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShieldCheck, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
 
 const loginSchema = z.object({
@@ -32,7 +31,6 @@ export default function AdminLoginPage() {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      // Force token refresh to get latest claims
       await userCredential.user.getIdToken(true);
       router.push("/admin");
     } catch (err) {
@@ -44,65 +42,93 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex bg-animated min-h-screen flex-col items-center justify-center p-6 sm:p-24 relative overflow-hidden noise">
-      <Link href="/" className="absolute top-6 left-6 inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-white transition-colors z-20">
-        <ArrowLeft className="w-4 h-4" /> Back to Home
-      </Link>
-      
-      {/* Background decorations */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-secondary/10 blur-[130px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-[#FAF9F6] flex flex-col">
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full glass-dark p-10 sm:p-12 rounded-[2rem] shadow-2xl relative z-10 text-white">
-        
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 ring-1 ring-white/20 glow-gold">
-             <ShieldCheck className="w-8 h-8 text-secondary" />
+      {/* Header */}
+      <header className="px-5 sm:px-8 py-4 border-b border-slate-200 bg-[#FAF9F6]">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <p className="font-serif text-lg font-bold tracking-tight text-primary leading-none">Jude Nii</p>
+            <p className="text-[9px] tracking-[0.22em] uppercase text-slate-400 font-semibold mt-0.5">Scholarship Fund</p>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Jude Nii Admin</h1>
-          <p className="text-slate-300 font-medium">Sign in to your administrative portal.</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 text-red-400 font-medium text-sm p-4 rounded-xl mb-8 border border-red-500/20">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-300">Email Address</label>
-            <input 
-              type="email" 
-              {...register("email")}
-              disabled={loading}
-              placeholder="admin@edu.gh"
-              className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all"
-            />
-            {errors.email && <p className="text-sm text-red-400 mt-1.5 font-medium">{errors.email.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-300">Password</label>
-            <input 
-              type="password" 
-              {...register("password")}
-              disabled={loading}
-              placeholder="••••••••"
-              className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all"
-            />
-            {errors.password && <p className="text-sm text-red-400 mt-1.5 font-medium">{errors.password.message}</p>}
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-secondary hover:bg-secondary/90 text-primary font-extrabold text-lg py-4 rounded-xl shadow-[0_0_20px_-5px_rgba(234,179,8,0.4)] transition-all disabled:opacity-50 mt-4 cursor-pointer"
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
           >
-            {loading ? "Authenticating..." : "Secure Sign In"}
-          </button>
-        </form>
-      </motion.div>
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
+        </div>
+      </header>
+
+      {/* Centered form */}
+      <div className="flex-1 flex items-center justify-center px-5 py-16">
+        <div className="w-full max-w-[420px]">
+
+          {/* Icon + heading */}
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <Lock className="w-6 h-6 text-secondary" />
+            </div>
+            <h1 className="font-serif text-3xl font-bold text-primary tracking-tight mb-1.5">
+              Staff Portal
+            </h1>
+            <p className="text-slate-500 text-sm">Authorized administrators only.</p>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-10 shadow-[0_1px_3px_rgba(0,0,0,0.04),_0_8px_24px_rgba(0,0,0,0.06)]">
+
+            {error && (
+              <div className="bg-red-50 text-red-700 text-sm font-medium p-4 rounded-xl mb-6 border border-red-100 leading-snug">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700">Email Address</label>
+                <input
+                  type="email"
+                  {...register("email")}
+                  disabled={loading}
+                  placeholder="admin@edu.gh"
+                  className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-sm text-primary placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all"
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-600 font-medium">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700">Password</label>
+                <input
+                  type="password"
+                  {...register("password")}
+                  disabled={loading}
+                  placeholder="••••••••"
+                  className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-sm text-primary placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all"
+                />
+                {errors.password && (
+                  <p className="text-xs text-red-600 font-medium">{errors.password.message}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-white font-bold text-sm py-3.5 rounded-xl hover:bg-primary/90 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 mt-1 cursor-pointer"
+              >
+                {loading ? "Signing in…" : "Sign In to Portal"}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 mt-5">
+            NUPS-G KNUST · Scholarship Management System
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

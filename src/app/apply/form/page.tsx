@@ -59,21 +59,44 @@ export default function ApplicationFormPage() {
     },
   });
 
-  if (yearIsLoading) {
-    return <div className="p-12 text-center text-slate-500">Loading secure portal...</div>;
+  if (yearIsLoading || (applicantAuth && draftIsLoading)) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-slate-500 font-medium">
+            {applicantAuth ? "Loading your draft…" : "Loading secure portal…"}
+          </p>
+        </div>
+      </div>
+    );
   }
   if (!activeYear || activeYear.status !== "OPEN") {
-    return <div className="p-12 text-center text-red-500">Portal is closed.</div>;
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center px-5">
+        <div className="text-center max-w-sm">
+          <p className="font-serif text-2xl font-bold text-primary mb-2">Portal is Closed</p>
+          <p className="text-slate-500 text-sm">Applications are not currently being accepted.</p>
+        </div>
+      </div>
+    );
   }
   if (!applicantAuth) {
     return (
-      <div className="min-h-screen bg-slate-50 py-24 px-6">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-5 py-16">
         <ApplicantLogin activeYearId={activeYear.id} onLogin={setApplicantAuth} />
       </div>
     );
   }
-  if (draftIsLoading || !draft) {
-    return <div className="p-12 text-center text-slate-500">Loading your draft securely...</div>;
+  if (!draft) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-slate-500 font-medium">Preparing your draft…</p>
+        </div>
+      </div>
+    );
   }
 
   const currentStep: number = draft.currentStep || 1;
@@ -86,7 +109,7 @@ export default function ApplicationFormPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#FAF9F6] py-12 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto space-y-10">
 
         {/* Header */}
