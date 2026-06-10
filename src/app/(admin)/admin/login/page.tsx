@@ -97,7 +97,7 @@ export default function AdminLoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-secondary hover:bg-secondary/90 text-primary font-extrabold text-lg py-4 rounded-xl shadow-[0_0_20px_-5px_rgba(234,179,8,0.4)] transition-all disabled:opacity-50 mt-4"
+            className="w-full bg-secondary hover:bg-secondary/90 text-primary font-extrabold text-lg py-4 rounded-xl shadow-[0_0_20px_-5px_rgba(234,179,8,0.4)] transition-all disabled:opacity-50 mt-4 cursor-pointer"
           >
             {loading ? "Authenticating..." : "Secure Sign In"}
           </button>
