@@ -155,56 +155,83 @@ Admin copies token link from /admin/endorsements
 
 ---
 
-## Local Development
+## Local Development & Setup
+
+Follow this step-by-step guide to get the application running from scratch.
 
 ### Prerequisites
 
-- Node.js 18+
-- A Firebase project (Firestore + Authentication enabled)
+- **Node.js**: version 18+
+- **Firebase Project**: An active project (e.g., `jude-nii-scholarship`) with Firestore and Authentication enabled.
 
-### 1. Clone and install
+### 1. Firebase Console Setup
+
+1. **Enable Authentication**:
+   - Go to **Authentication** → **Sign-in method** → **Email/Password** and click **Enable**.
+   - Under the **Users** tab, click **Add user** and create your admin account (e.g., `judeniiadmin@gmail.com`).
+2. **Create Firestore Database**:
+   - Go to **Firestore Database** and click **Create database**.
+   - Start in **Production mode**, pick a region, and click **Enable**.
+3. **Download Admin Service Account Key**:
+   - Go to **Project Settings** (gear icon) → **Service accounts**.
+   - Click **Generate new private key** and download the JSON file.
+
+### 2. Installation & Environment Configuration
+
+1. **Clone the repository and install dependencies**:
+   ```bash
+   git clone <repository-url>
+   cd jude-nii-scholarship-app
+   npm install
+   ```
+
+2. **Configure environment variables**:
+   Create a `.env.local` file by copying the template:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Open `.env.local` and fill in the values using your downloaded Service Account JSON:
+   - Client-side configuration (`NEXT_PUBLIC_FIREBASE_*`) can be found in the web app settings.
+   - Server-side Admin SDK credentials (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` where newlines are replaced with `\n`).
+   - Set a custom `CRON_SECRET` (e.g., `12345678` for local testing).
+
+### 3. Deploy Firestore Security Rules
+
+Deploy the pre-configured security rules defined in `firestore.rules` using the Firebase CLI:
 
 ```bash
-git clone <repository-url>
-cd jude-nii-scholarship-app
-npm install
+# Login to Firebase
+npx -y firebase-tools@latest login
+
+# Deploy rules to your project
+npx -y firebase-tools@latest deploy --only firestore:rules --project <your-project-id>
 ```
 
-### 2. Configure environment
+### 4. Start the Application
 
-Copy the example file and fill in your values:
-
-```bash
-cp .env.example .env.local
-```
-
-See [Environment Variables](#environment-variables) for details on each key.
-
-### 3. Seed an admin user
-
-After signing up through Firebase Auth, grant admin access using the setup script:
-
-```bash
-node scripts/setAdmin.js your-admin@email.com
-```
-
-This sets the `role: "SUPER_ADMIN"` custom claim on the Firebase user. The user must then sign out and back in for the claim to take effect.
-
-Alternatively, call the setup API endpoint directly (requires `CRON_SECRET`):
-
-```bash
-curl -X POST http://localhost:3000/api/auth/setup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","role":"SUPER_ADMIN","secret":"<your-CRON_SECRET>"}'
-```
-
-### 4. Start the development server
+Start the local Next.js development server:
 
 ```bash
 npm run dev
 ```
 
-The app is available at [http://localhost:3000](http://localhost:3000).
+The application will be running at [http://localhost:3000](http://localhost:3000).
+
+### 5. Elevate User to SUPER_ADMIN
+
+Because Firebase Authentication doesn't assign custom claims/roles by default, you must trigger the secure setup endpoint once the app is running:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/setup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "judeniiadmin@gmail.com",
+    "role": "SUPER_ADMIN",
+    "secret": "12345678"
+  }'
+```
+
+*Note: Replace `judeniiadmin@gmail.com` with the email you signed up with and `12345678` with the `CRON_SECRET` configured in your `.env.local`.*
 
 | Route | Description |
 |---|---|

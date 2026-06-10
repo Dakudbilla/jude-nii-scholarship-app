@@ -12,6 +12,9 @@
   --color-destructive:        hsl(0, 84%, 60%);
   --color-muted:              hsl(214, 32%, 91%);
   --color-muted-foreground:   hsl(215, 16%, 47%);
+
+  --font-sans:   var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif:  var(--font-cormorant), Georgia, 'Times New Roman', serif;
 }
 
 @layer base {
