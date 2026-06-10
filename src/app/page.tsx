@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Award, Search, ChevronRight, ShieldCheck, HandHeart, CheckCircle2 } from "lucide-react";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: (delay = 0) => ({
+  show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay },
-  }),
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  },
 };
 
 export default function Home() {
@@ -137,8 +137,9 @@ export default function Home() {
                     key={deg}
                     className="absolute w-2 h-2 rounded-full bg-secondary/50"
                     style={{
-                      top: `calc(50% + ${Math.sin((deg * Math.PI) / 180) * 186}px - 4px)`,
-                      left: `calc(50% + ${Math.cos((deg * Math.PI) / 180) * 186}px - 4px)`,
+                      top: "calc(50% - 4px)",
+                      left: "calc(50% - 4px)",
+                      transform: `translate(${(Math.cos((deg * Math.PI) / 180) * 186).toFixed(3)}px, ${(Math.sin((deg * Math.PI) / 180) * 186).toFixed(3)}px)`,
                     }}
                   />
                 ))}
